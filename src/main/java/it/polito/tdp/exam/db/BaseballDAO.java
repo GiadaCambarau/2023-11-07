@@ -6,12 +6,91 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.polito.tdp.exam.model.People;
 import it.polito.tdp.exam.model.Team;
 
 public class BaseballDAO {
+	
+	public List<Integer> getAnni(){
+		String sql = "SELECT distinct t.`year` as a  "
+				+ "FROM teams t";
+		List<Integer> result = new ArrayList<>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(rs.getInt("a"));
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database", e);
+		}
+	}
+	
+	public List<Team> getTeam(int anno, Map<String, Team>mappa){
+		String sql = "SELECT DISTINCT a.teamCode as id "
+				+ "FROM appearances a "
+				+ "WHERE  a.`year`= ? ";
+		List<Team> result = new ArrayList<>();
+
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, anno);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(mappa.get(rs.getString("id")));
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database", e);
+		}
+	}
+	
+	public Map<String, Integer> getSalario(int anno){
+		String sql = "SELECT t.teamCode as id , SUM(s.salary) AS peso "
+				+ "FROM salaries s, appearances  a, teams t "
+				+ "WHERE a.playerID = s.playerID AND  a.teamID = t.ID  AND a.`year`= t.`year` AND t.`year`=? "
+				+ "GROUP BY t.teamCode ";
+		Map<String, Integer> result = new HashMap<>();
+
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, anno);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.put(rs.getString("id"), rs.getInt("peso"));
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database", e);
+		}
+				
+	}
+	
+	
+	
 
 	public List<People> readAllPlayers() {
 		String sql = "SELECT * " + "FROM people";

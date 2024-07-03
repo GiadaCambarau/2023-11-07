@@ -249,7 +249,7 @@ public class Team {
 
 	@Override
 	public String toString() {
-		return teamCode;
+		return name+"  ("+teamCode+")";
 	}
     
     

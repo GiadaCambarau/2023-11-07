@@ -1,9 +1,11 @@
 package it.polito.tdp.exam;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.exam.model.Model;
+import it.polito.tdp.exam.model.Team;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -31,10 +33,10 @@ public class FXMLController {
     private Button btnPercorso;
 
     @FXML
-    private ComboBox<?> cmbAnno;
+    private ComboBox<Integer> cmbAnno;
 
     @FXML
-    private ComboBox<?> cmbSquadra;
+    private ComboBox<Team> cmbSquadra;
 
     @FXML
     private TextArea txtResult;
@@ -44,17 +46,36 @@ public class FXMLController {
 
     @FXML
     void handleAnno(ActionEvent event) {
-
+    	
+    	if (cmbAnno.getValue()!= null) {
+    		int anno = cmbAnno.getValue();
+    		cmbSquadra.getItems().addAll(model.getTeams(anno));
+    		for (Team t: model.getTeams(anno)) {
+    			txtSquadre.appendText(t+"\n");
+    		}
+    	}
     }
 
     @FXML
     void handleCreaGrafo(ActionEvent event) {
-
+    	if (cmbAnno.getValue()!= null) {
+    		int anno = cmbAnno.getValue();
+    		model.creaGrafo(anno);
+    		txtResult.appendText("Vertici: "+ model.getV()+"\nArchi: "+ model.getA());
+    		
+    	}
     }
 
     @FXML
     void handleDettagli(ActionEvent event) {
-
+    	if (cmbSquadra.getValue()!= null) {
+    		Team t = cmbSquadra.getValue();
+    		Map<String,Integer> m = model.getAdiacenti(t);
+    		txtResult.appendText("Gli adiacenti di "+ t.getTeamCode()+ " sono: \n");
+    		for (String s : m.keySet()) {
+    			txtResult.appendText(s+" ("+ m.get(s)+") \n");
+    		}
+    	}
     }
 
     @FXML
@@ -76,7 +97,7 @@ public class FXMLController {
 
 	public void setModel(Model model) {
 		this.model= model;
-		
+		cmbAnno.getItems().addAll(model.getAnni());
 	}
 
 }
